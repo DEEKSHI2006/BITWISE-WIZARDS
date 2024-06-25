@@ -1,0 +1,43 @@
+import pytesseract
+from PIL import Image
+from pytesseract import Output
+import os
+
+def ocr_to_html(image_path):
+    # Open an image file
+    image = Image.open(image_path)
+
+    # Perform OCR using pytesseract
+    ocr_data = pytesseract.image_to_data(image, output_type=Output.DICT)
+
+    # Start HTML document
+    html = "<html><body style='font-family: Arial, sans-serif;'>"
+
+    # Iterate through the OCR data to build HTML
+    for i in range(len(ocr_data['text'])):
+        if int(ocr_data['conf'][i]) > 60:  
+            text = ocr_data['text'][i]
+            left = ocr_data['left'][i]
+            top = ocr_data['top'][i]
+            width = ocr_data['width'][i]
+            height = ocr_data['height'][i]
+            # Create a span element with inline CSS to position the text
+            html += f"<span style='position: absolute; left: {left}px; top: {top}px; width: {width}px; height: {height}px;'>{text}</span>"
+
+    # End HTML document
+    html += "</body></html>"
+
+    return html
+
+# Path to your image
+image_path = 'sample1.png'
+
+# Convert OCR result to HTML
+html_content = ocr_to_html(image_path)
+
+# Save HTML to file
+output_html_path = 'output.html'
+with open(output_html_path, 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print(f"HTML content saved to {output_html_path}")
